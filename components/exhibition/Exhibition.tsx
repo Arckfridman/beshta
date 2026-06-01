@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { artworks, fieldOrigin, getFieldBounds, brickLayout, gridLayout } from "@/lib/artworks";
+import { useMobile } from "@/hooks/useMobile";
 
 const fieldPad = 480;
 const fieldBounds = getFieldBounds();
@@ -15,6 +16,10 @@ import { CollectionPanel } from "./CollectionPanel";
 import { ContactsPanel } from "./ContactsPanel";
 import { SiteNav } from "./SiteNav";
 import { ZoomToggle } from "./ZoomToggle";
+import { MobileHeader } from "./MobileHeader";
+import { MobileNav } from "./MobileNav";
+import { MobileExhibition } from "./MobileExhibition";
+import { MobileArtworkFocus } from "./MobileArtworkFocus";
 
 type FocusOrigin = {
   id: string;
@@ -30,6 +35,8 @@ export function Exhibition() {
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [contactsOpen, setContactsOpen] = useState(false);
   const [layoutMode, setLayoutMode] = useState<"brick" | "grid">("brick");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useMobile();
 
   const isExploring = !focusedId && !collectionOpen && !contactsOpen;
 
@@ -85,6 +92,7 @@ export function Exhibition() {
         setFocusOrigin(null);
         setCollectionOpen(false);
         setContactsOpen(false);
+        setMobileMenuOpen(false);
         return;
       }
 
@@ -109,6 +117,35 @@ export function Exhibition() {
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (isMobile) {
+    return (
+      <>
+        <MobileHeader
+          onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+          isMenuOpen={mobileMenuOpen}
+        />
+        <MobileNav
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          onNavigate={onNavTap}
+        />
+        <MobileExhibition onArtworkTap={onArtworkTap} />
+        <MobileArtworkFocus
+          artwork={artworks.find((a) => a.id === focusedId) ?? null}
+          onClose={() => setFocusedId(null)}
+        />
+        <CollectionPanel
+          open={collectionOpen}
+          onClose={() => setCollectionOpen(false)}
+        />
+        <ContactsPanel
+          open={contactsOpen}
+          onClose={() => setContactsOpen(false)}
+        />
+      </>
+    );
+  }
 
   return (
     <>
