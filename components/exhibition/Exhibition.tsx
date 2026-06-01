@@ -88,7 +88,7 @@ export function Exhibition() {
         return;
       }
 
-      if (!isExploring) return;
+      if (focusedId || collectionOpen || contactsOpen) return;
 
       if (e.key === "+" || e.key === "=") {
         e.preventDefault();
@@ -108,7 +108,7 @@ export function Exhibition() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isExploring]);
+  }, []);
 
   return (
     <>
