@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd beshta && npm run build",
-  "outputDirectory": "beshta/.next",
-  "installCommand": "cd beshta && npm install"
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install"
 }
