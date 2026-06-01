@@ -156,6 +156,7 @@ export function Exhibition() {
         className={`exhibition-canvas relative h-dvh w-full overflow-hidden bg-canvas select-none touch-none ${
           isExploring ? "" : "cursor-default"
         }`}
+        style={{ overflow: "hidden" }}
       >
         <SiteNav inverted={focusedId !== null} />
 
