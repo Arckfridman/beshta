@@ -9,7 +9,7 @@ type MobileExhibitionProps = {
 
 export function MobileExhibition({ onArtworkTap }: MobileExhibitionProps) {
   return (
-    <div className="pt-16 pb-8 px-4 bg-[#f8f7f3] min-h-screen">
+    <div className="h-screen pt-16 pb-8 px-4 bg-[#f8f7f3] overflow-y-auto" style={{ touchAction: "auto" }}>
       <div className="space-y-8">
         {artworks.map((artwork) => (
           <MobileArtworkCard

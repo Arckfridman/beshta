@@ -4,11 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { artworks, fieldOrigin, getFieldBounds, brickLayout, gridLayout } from "@/lib/artworks";
 import { useMobile } from "@/hooks/useMobile";
-
-const fieldPad = 480;
-const fieldBounds = getFieldBounds();
-const canvasMinW = fieldBounds.width + fieldPad * 2;
-const canvasMinH = fieldBounds.height + fieldPad * 2;
 import { useExhibitionCamera } from "@/hooks/useExhibitionCamera";
 import { ArtworkFocus } from "./ArtworkFocus";
 import { ArtworkNode } from "./ArtworkNode";
@@ -65,26 +60,6 @@ export function Exhibition() {
     setFocusedId(id);
   }, []);
 
-  const { panX, panY, scale, recenter, zoomBy } = useExhibitionCamera(
-    isExploring,
-    { onNavTap, onArtworkTap },
-  );
-
-  const toggleZoom = useCallback(() => {
-    setLayoutMode((prev) => {
-      const newMode = prev === "brick" ? "grid" : "brick";
-      if (newMode === "grid") {
-        scale.set(0.55);
-        recenter();
-      } else {
-        scale.set(1);
-        recenter();
-      }
-      return newMode;
-    });
-  }, [scale, recenter]);
-
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -94,23 +69,6 @@ export function Exhibition() {
         setContactsOpen(false);
         setMobileMenuOpen(false);
         return;
-      }
-
-      if (focusedId || collectionOpen || contactsOpen) return;
-
-      if (e.key === "+" || e.key === "=") {
-        e.preventDefault();
-        zoomBy(1.5);
-      }
-
-      if (e.key === "-" || e.key === "_") {
-        e.preventDefault();
-        zoomBy(0.5);
-      }
-
-      if (e.key === "0") {
-        e.preventDefault();
-        recenter();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -146,6 +104,108 @@ export function Exhibition() {
       </>
     );
   }
+
+  return <DesktopExhibition
+    focusedId={focusedId}
+    setFocusedId={setFocusedId}
+    focusOrigin={focusOrigin}
+    setFocusOrigin={setFocusOrigin}
+    collectionOpen={collectionOpen}
+    setCollectionOpen={setCollectionOpen}
+    contactsOpen={contactsOpen}
+    setContactsOpen={setContactsOpen}
+    layoutMode={layoutMode}
+    setLayoutMode={setLayoutMode}
+    isExploring={isExploring}
+    onNavTap={onNavTap}
+    onArtworkTap={onArtworkTap}
+  />;
+}
+
+type DesktopExhibitionProps = {
+  focusedId: string | null;
+  setFocusedId: (id: string | null) => void;
+  focusOrigin: FocusOrigin | null;
+  setFocusOrigin: (origin: FocusOrigin | null) => void;
+  collectionOpen: boolean;
+  setCollectionOpen: (open: boolean) => void;
+  contactsOpen: boolean;
+  setContactsOpen: (open: boolean) => void;
+  layoutMode: "brick" | "grid";
+  setLayoutMode: (mode: "brick" | "grid") => void;
+  isExploring: boolean;
+  onNavTap: (action: string) => void;
+  onArtworkTap: (id: string) => void;
+};
+
+function DesktopExhibition({
+  focusedId,
+  setFocusedId,
+  focusOrigin,
+  setFocusOrigin,
+  collectionOpen,
+  setCollectionOpen,
+  contactsOpen,
+  setContactsOpen,
+  layoutMode,
+  setLayoutMode,
+  isExploring,
+  onNavTap,
+  onArtworkTap,
+}: DesktopExhibitionProps) {
+  const fieldPad = 480;
+  const fieldBounds = getFieldBounds();
+  const canvasMinW = fieldBounds.width + fieldPad * 2;
+  const canvasMinH = fieldBounds.height + fieldPad * 2;
+
+  const { panX, panY, scale, recenter, zoomBy } = useExhibitionCamera(
+    isExploring,
+    { onNavTap, onArtworkTap },
+  );
+
+  const toggleZoom = useCallback(() => {
+    const newMode = layoutMode === "brick" ? "grid" : "brick";
+    setLayoutMode(newMode);
+    if (newMode === "grid") {
+      scale.set(0.55);
+      recenter();
+    } else {
+      scale.set(1);
+      recenter();
+    }
+  }, [layoutMode, scale, recenter, setLayoutMode]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setFocusedId(null);
+        setFocusOrigin(null);
+        setCollectionOpen(false);
+        setContactsOpen(false);
+        return;
+      }
+
+      if (focusedId || collectionOpen || contactsOpen) return;
+
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        zoomBy(1.5);
+      }
+
+      if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        zoomBy(0.5);
+      }
+
+      if (e.key === "0") {
+        e.preventDefault();
+        recenter();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusedId, collectionOpen, contactsOpen, zoomBy, recenter]);
 
   return (
     <>
